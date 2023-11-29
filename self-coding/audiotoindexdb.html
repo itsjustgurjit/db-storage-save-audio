@@ -36,13 +36,10 @@
         background-color: lightcoral;
     }
 </style>
-<div class="lala" id="lala">click check</div>
+
 
 <script>
-    let lala = document.querySelector('.lala');
-    lala.addEventListener('click', () => {
-        console.log('class can be grabbed');
-    });
+    
 
     let currentAudioPlayer = null; // To keep track of the currently playing audio
 
@@ -162,7 +159,7 @@
     }
 
     // Function to update the dropdown menu with saved audio files
-    
+
     function updateDropdown() {
         const db = request.result;
         const transaction = db.transaction(['audioFiles'], 'readonly');
