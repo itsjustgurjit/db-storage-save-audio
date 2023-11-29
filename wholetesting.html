@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Player</title>
+    <script src="https://kit.fontawesome.com/119d0f20b0.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    
+
+<!-- File Upload Button -->
+<div class="col-2 customplaybtnEdit" style="cursor: pointer;">
+    <label for="fileInput">
+        <i class="fas fa-upload customplayButton fa-2x"></i>
+        <input type="file" id="fileInput" accept="audio/*" style="display: none;" onchange="handleFileSelect()">
+    </label>
+</div>
+
+<!-- Play Button for Selected File -->
+<div>
+    <button id="playButton" disabled onclick="playSelectedAudio()">Play Selected Audio</button>
+</div>
+
+<!-- Dropdown Menu for Saved Audio Files -->
+<div>
+    <label for="audioDropdown">Select Saved Audio:</label>
+    <select id="audioDropdown" onchange="playSavedAudio()">
+        <!-- Options will be dynamically added here -->
+    </select>
+</div>
+
+<style>
+    .lala{
+        height: 90px;
+        width: 120px;
+        background-color: lightcoral;
+    }
+</style>
+<div class="lala" id="lala">click check</div>
+<script>
+    let lala = document.querySelector('.lala')
+    lala.addEventListener('click',()=>{
+        console.log('class can be grabbed')
+    })
+    let currentAudioPlayer = null; // To keep track of the currently playing audio
+
+    // Function to handle file selection
+    function handleFileSelect() {
+        const fileInput = document.getElementById('fileInput');
+        const playButton = document.getElementById('playButton');
+
+        // Check if a file is selected and within size limit
+        if (fileInput.files.length > 0 && fileInput.files[0].size <= 5 * 1024 * 1024) {
+            playButton.disabled = false; // Enable play button
+
+            // Save the selected file to local storage
+            saveFileToLocal(fileInput.files[0]);
+        } else {
+            playButton.disabled = true; // Disable play button
+        }
+    }
+
+    // Function to play the selected audio file
+    function playSelectedAudio() {
+        const fileInput = document.getElementById('fileInput');
+        const audioPlayer = new Audio();
+        audioPlayer.src = URL.createObjectURL(fileInput.files[0]);
+
+        // Stop the currently playing audio if any
+        if (currentAudioPlayer) {
+            currentAudioPlayer.pause();
+            currentAudioPlayer.currentTime = 0;
+        }
+
+        // Set the new audio player as the current player
+        currentAudioPlayer = audioPlayer;
+
+        audioPlayer.play();
+    }
+
+    // Function to play the selected saved audio file
+    function playSavedAudio() {
+        const audioDropdown = document.getElementById('audioDropdown');
+        const audioPlayer = new Audio();
+        const base64Data = audioDropdown.value.split(',')[1]; // Extract base64 data
+        const blob = base64toBlob(base64Data, 'audio/*');
+        audioPlayer.src = URL.createObjectURL(blob);
+
+        // Stop the currently playing audio if any
+        if (currentAudioPlayer) {
+            currentAudioPlayer.pause();
+            currentAudioPlayer.currentTime = 0;
+        }
+
+        // Set the new audio player as the current player
+        currentAudioPlayer = audioPlayer;
+
+        audioPlayer.play();
+    }
+
+    // Function to save file as base64 to local storage
+    function saveFileToLocal(file) {
+        const reader = new FileReader();
+
+        reader.onload = function (event) {
+            const base64Data = event.target.result.split(',')[1]; // Extract base64 data
+
+            const savedAudioFiles = getSavedAudioFiles();
+            const fileName = file.name;
+
+            const newAudioFile = { name: fileName, data: base64Data };
+            savedAudioFiles.push(newAudioFile);
+            localStorage.setItem('audioFiles', JSON.stringify(savedAudioFiles));
+
+            // Update the dropdown menu with the new file
+            updateDropdown(savedAudioFiles);
+        };
+
+        // Read the file as Data URL (base64)
+        reader.readAsDataURL(file);
+    }
+
+    // Function to get saved audio files from local storage
+    function getSavedAudioFiles() {
+        return JSON.parse(localStorage.getItem('audioFiles')) || [];
+    }
+
+    // Function to update the dropdown menu with saved audio files
+    function updateDropdown(savedAudioFiles) {
+        const audioDropdown = document.getElementById('audioDropdown');
+        audioDropdown.innerHTML = ''; // Clear existing options
+
+        savedAudioFiles.forEach((audio, index) => {
+            const option = document.createElement('option');
+            option.value = 'data:audio/*;base64,' + audio.data;
+            option.text = audio.name;
+            audioDropdown.add(option);
+        });
+    }
+
+    // Function to convert base64 to Blob
+    function base64toBlob(base64Data, contentType) {
+        contentType = contentType || '';
+        const sliceSize = 512;
+        const byteCharacters = atob(base64Data);
+        const byteArrays = [];
+
+        for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+            const slice = byteCharacters.slice(offset, offset + sliceSize);
+
+            const byteNumbers = new Array(slice.length);
+            for (let i = 0; i < slice.length; i++) {
+                byteNumbers[i] = slice.charCodeAt(i);
+            }
+
+            const byteArray = new Uint8Array(byteNumbers);
+            byteArrays.push(byteArray);
+        }
+
+        return new Blob(byteArrays, { type: contentType });
+    }
+
+    // Initialize the dropdown menu with saved audio files on page load
+    window.onload = function () {
+        const savedAudioFiles = getSavedAudioFiles();
+        updateDropdown(savedAudioFiles);
+    };
+</script>
+
+</body>
+</html>

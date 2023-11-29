@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>audio set to local </title>
+</head>
+<body>
+    <input type="file" name="file-input" id="file-select" accept="audio/*" onchange="handleFileSelect()" >
+    <button id="play-sound">Play audio</button>
+    
+    <div class="audio-list">
+        <select name="audio-dropdown" id="audio-dropdown">
+            <option value="One">one</option>
+            <option value="Two">two</option>
+            <option value="three">three</option>
+            <option value="threeandhalf">three-and-half</option>
+            <option value="four">four</option>
+        </select>
+    </div>
+<!-- Your existing HTML code remains unchanged -->
+
+<script>
+    function handleFileSelect() {
+        let fileInput = document.getElementById('file-select');
+        saveFileToIndexedDB(fileInput.files[0]);
+    }
+
+    function saveFileToIndexedDB(file) {
+        const fileName = file.name;
+        const reader = new FileReader();
+
+        reader.onload = function (event) {
+            const base64Data = event.target.result.split(',')[1]; // Extracting Base64 data
+            saveBase64AudioToLocal(fileName, base64Data);
+        };
+
+        reader.readAsDataURL(file);
+    }
+
+    function saveBase64AudioToLocal(fileName, base64Data) {
+        const savedAudioFiles = getSavedAudioFiles();
+        const newAudioFile = { name: fileName, path: base64Data };
+        savedAudioFiles.push(newAudioFile);
+
+        const transaction = getDatabase().transaction(['audioFiles'], 'readwrite');
+        const objectStore = transaction.objectStore('audioFiles');
+        const addRequest = objectStore.add(newAudioFile);
+
+        addRequest.onsuccess = function (event) {
+            console.log('Audio file added to IndexedDB:', event.target.result);
+            updateDropdown(savedAudioFiles);
+        };
+
+        addRequest.onerror = function (event) {
+            console.error('Error adding audio file to IndexedDB:', event.target.error);
+        };
+    }
+
+    function getSavedAudioFiles() {
+        return JSON.parse(localStorage.getItem('audioFiles')) || [];
+    }
+
+    function updateDropdown(savedAudioFiles) {
+        const audioDropdown = document.getElementById('audio-dropdown');
+        audioDropdown.innerHTML = ''; // Clear existing options
+
+        savedAudioFiles.forEach((audio, index) => {
+            const option = document.createElement('option');
+            option.value = audio.path;
+            option.text = audio.name;
+            audioDropdown.add(option);
+        });
+    }
+
+    function getDatabase() {
+        const dbName = 'AudioDatabase';
+        const versionNumber = 1;
+
+        const request = indexedDB.open(dbName, versionNumber);
+
+        request.onupgradeneeded = function (event) {
+            const db = event.target.result;
+            const objectStore = db.createObjectStore('audioFiles', { keyPath: 'name' });
+            objectStore.createIndex('name', 'name', { unique: true });
+            objectStore.createIndex('path', 'path', { unique: false });
+        };
+
+        return request.result;
+    }
+
+    window.onload = function () {
+        const savedAudioFiles = getSavedAudioFiles();
+        updateDropdown(savedAudioFiles);
+    };
+</script>
+
+</body>
+</html>

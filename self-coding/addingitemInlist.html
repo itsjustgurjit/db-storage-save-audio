@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <input type="file"  id="filenew">
+    
+        <select name="drops" id="drops">
+            <option value="one">one</option>
+         </select>
+         <input type="text" id="text">
+         <button id="addtext" onclick="addtext()">add</button>
+
+         <button id="loaditems" onclick="loaditems()">load items</button>
+    <script>
+        let filenew = document.getElementById('filenew')
+        let drops = document.querySelector('#drops')
+
+        //let loaditems = document.getElementById('loaditems')
+
+        let thearray = []
+
+        let addtext = () => {
+            let text = document.getElementById('text').value;
+            let newobj = document.createElement('option');
+            newobj.value = text;
+            newobj.innerText = text;
+            drops.appendChild(newobj);
+            thearray.push({ value: text, text: text });        
+            localStorage.setItem(`item_${text}`, JSON.stringify({ value: text, text: text }));
+        }
+        
+        let loaditems = () => {
+            // Clear existing options
+            drops.innerHTML = '';
+        
+            // Retrieve option details from localStorage and add them to the select element
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+        
+                if (key.startsWith('item_')) {
+                    const optionDetails = JSON.parse(value);
+                    
+                    let newOption = document.createElement('option');
+                    newOption.value = optionDetails.value;
+                    newOption.innerText = optionDetails.text;
+                    drops.appendChild(newOption);
+                }
+            }
+        }
+
+
+
+
+
+        
+
+
+
+
+    </script>
+
+    
+</body>
+</html>

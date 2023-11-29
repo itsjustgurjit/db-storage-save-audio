@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base64 to Audio</title>
+</head>
+<body>
+
+    <h1>Base64 to Audio</h1>
+
+    <div>
+        <textarea id="base64Input" rows="5" cols="50" placeholder="Paste Base64 here"></textarea>
+    </div>
+    <button onclick="convertToAudio()">Convert to Audio</button>
+    <button onclick="playAudio()">Play Audio</button>
+    <audio id="audioPlayer"></audio>
+
+    <script>
+        function convertToAudio() {
+            const base64Input = document.getElementById('base64Input');
+            const audioPlayer = document.getElementById('audioPlayer');
+
+            const base64Data = base64Input.value;
+            
+            // Set the base64 data as the source for the audio player
+            audioPlayer.src = 'data:audio/wav;base64,' + base64Data;
+        }
+
+        function playAudio() {
+            const audioPlayer = document.getElementById('audioPlayer');
+            audioPlayer.play();
+        }
+    </script>
+
+</body>
+</html>

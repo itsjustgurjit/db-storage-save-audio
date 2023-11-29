@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <input type="file" multiple onchange="showfile(this)">
+        <script>
+            const showfile = (input)=>{
+                let files = input.files;
+                
+                for(let i = 0;i < files.length; i++){
+                    console.log(files[i].name)
+                }
+            }
+            
+        </script>
+</body>
+</html>

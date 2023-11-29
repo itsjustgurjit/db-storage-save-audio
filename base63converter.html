@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Converter</title>
+</head>
+<body>
+
+    <h1>Audio Converter</h1>
+
+    <input type="file" id="fileInput" accept="audio/*">
+    <button onclick="convertToBase64()">Convert to Base64</button>
+
+    <div>
+        <textarea id="base64Display" rows="5" cols="50" readonly></textarea>
+        <button onclick="copyBase64()">Copy Base64</button>
+    </div>
+
+    <button onclick="convertToAudio()">Convert to Audio</button>
+    
+    <div>
+        <textarea id="base64Input" rows="5" cols="50" placeholder="Paste Base64 here"></textarea>
+    </div>
+    <audio controls id="audioPlayer"></audio>
+
+    <script>
+        function convertToBase64() {
+            const fileInput = document.getElementById('fileInput');
+            const base64Display = document.getElementById('base64Display');
+            const audioPlayer = document.getElementById('audioPlayer');
+
+            const reader = new FileReader();
+
+            reader.onload = function (event) {
+                const base64Data = event.target.result.split(',')[1]; // Extract base64 data
+                base64Display.value = base64Data;
+
+                // Set the base64 data as the source for the audio player
+                audioPlayer.src = 'data:audio/wav;base64,' + base64Data;
+            };
+
+            // Read the file as Data URL (base64)
+            reader.readAsDataURL(fileInput.files[0]);
+        }
+
+        function copyBase64() {
+            const base64Display = document.getElementById('base64Display');
+            base64Display.select();
+            document.execCommand('copy');
+        }
+
+        function convertToAudio() {
+            const base64Input = document.getElementById('base64Input');
+            const audioPlayer = document.getElementById('audioPlayer');
+
+            const base64Data = base64Input.value;
+            
+            // Set the base64 data as the source for the audio player
+            audioPlayer.src = 'data:audio/wav;base64,' + base64Data;
+        }
+    </script>
+
+</body>
+</html>
