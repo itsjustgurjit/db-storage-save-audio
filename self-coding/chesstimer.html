@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Timer</title>
+    <script src="https://kit.fontawesome.com/119d0f20b0.js" crossorigin="anonymous"></script>
+</head>
+<style>
+    body {
+        background-color: red;
+    }
+
+    .animated-div {
+        outline: 0px solid white;
+        animation: border-flash 1s ease-in-out infinite;
+    }
+
+    @keyframes border-flash {
+        0% { outline: 0px solid white; }
+        50% { outline: 3px solid white; }
+        100% { outline: 0px solid white; }
+    }
+</style>
+
+<body>
+
+    <div class="container-fluid full_screen_preview">
+        <div id="clockdate">
+            <div class="timer-wrapper clockdate-wrapper chess-timer-wrapper">
+                <div class="timerDiv">
+                    <span>10:00</span>
+                </div>
+                <div class="timerDiv2">
+                    <span>10:00</span>
+                </div>
+            </div>
+            <div class="buttons text-center">
+                <button id="startButton" class="btn" style="border:3px solid #fff">Start</button>
+                <button id="switchButton" class="btn" style="border:3px solid #fff; display: none;">Switch</button>
+                <button id="resetButton" class="btn" style="border:3px solid #fff">Reset</button>
+            </div>
+        </div>
+        <audio id="playAudio" src="/self-coding/sounds/classic.mp3" loop></audio>
+    </div>
+
+    <script>
+
+        let timer1 = document.querySelector('.timerDiv span');
+        let timer2 = document.querySelector('.timerDiv2 span');
+        let timerDiv = document.querySelector('.timerDiv');
+        let timerDiv2 = document.querySelector('.timerDiv2');
+
+        let startButton = document.getElementById('startButton');
+        let switchButton = document.getElementById('switchButton');
+        let resetButton = document.getElementById('resetButton');
+        let playAudio = document.getElementById('playAudio');
+
+        let switchFlag = true;
+        let interval;
+        let remainingTimeTimer1 = 6;
+        let remainingTimeTimer2 = 6;
+        let remainingTime = remainingTimeTimer1; // Set initial remainingTime
+
+        const updateTimer = (minutes, seconds) => {
+            if (switchFlag) {
+                timer1.textContent = `${minutes}:${seconds}`;
+            } else {
+                timer2.textContent = `${minutes}:${seconds}`;
+            }
+        };
+
+        const switchTimers = () => {
+            clearInterval(interval);
+
+            if (switchFlag) {
+                remainingTimeTimer1 = remainingTime;
+                timerDiv.classList.remove('animated-div'); // Remove class from the previously running timer
+            } else {
+                remainingTimeTimer2 = remainingTime;
+                timerDiv2.classList.remove('animated-div'); // Remove class from the previously running timer
+            }
+
+            switchFlag = !switchFlag;
+            remainingTime = switchFlag ? remainingTimeTimer1 : remainingTimeTimer2;
+
+            addAnimate(); // Add animation to the new running timer
+            startTimer();
+        }
+
+        const resetTimers = () => {
+            clearInterval(interval);
+            switchFlag = true;
+            timer1.textContent = '10:00';
+            timer2.textContent = '10:00';
+            remainingTime = remainingTimeTimer1;
+            showStartButton();
+            timerDiv.classList.remove('animated-div'); // Remove class from the reset timer
+            timerDiv2.classList.remove('animated-div'); // Remove class from the reset timer
+        }
+
+        const startTimers = () => {
+            resetTimers();
+            hideStartButton();
+            startTimer();
+            addAnimate();
+        }
+
+        const startTimer = () => {
+            interval = setInterval(() => {
+                const minutes = Math.floor(remainingTime / 60);
+                const seconds = remainingTime % 60;
+                updateTimer(minutes, seconds);
+
+                if (remainingTime === 0) {
+                    if (remainingTimeTimer1 === 0 && remainingTimeTimer2 === 0) {
+                        // Both timers are zero, perform the desired actions
+                        document.body.style.backgroundColor = 'blue';
+                        resetButton.style.display = 'none';
+                        playAudio.play();
+                        timerDiv.classList.remove('animated-div');
+                        timerDiv2.classList.remove('animated-div');
+                        clearInterval(interval); // Stop the interval
+                        return;
+                    }
+                    switchTimers();
+                    switchButton.style.display = 'none';
+                    timerDiv.classList.remove('animated-div')
+                    timerDiv2.classList.remove('animated-div')
+
+                } else {
+                    remainingTime--;
+                }
+            }, 1000);
+        };
+
+        const hideStartButton = () => {
+            startButton.style.display = 'none';
+            switchButton.style.display = 'inline-block';
+        }
+
+        const showStartButton = () => {
+            startButton.style.display = 'inline-block';
+            switchButton.style.display = 'none';
+        }
+
+        const addAnimate = () => {
+            if (switchFlag) {
+                timerDiv.classList.add('animated-div'); // Add class to the running timer
+            } else {
+                timerDiv2.classList.add('animated-div'); // Add class to the running timer
+            }
+        }
+
+        resetTimers();
+
+        startButton.addEventListener('click', startTimers);
+        switchButton.addEventListener('click', switchTimers);
+        resetButton.addEventListener('click', resetTimers);
+    </script>
+</body>
+</html>
